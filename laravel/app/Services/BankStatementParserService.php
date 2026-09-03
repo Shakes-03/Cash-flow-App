@@ -1,21 +1,30 @@
+<?php
+
 namespace App\Services;
 
 use App\Models\BankImport;
 use App\Models\Transaction;
-use League\Csv\Reader;
-use Illuminate\Http\UploadedFile;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use League\Csv\Reader;
 
 class BankStatementParserService
 {
-    public function parse(UploadedFile $file, int $userId): BankImport
+    /**
+     * Parses a Revolut Business statement export.
+     *
+     * Expected headers (whitespace-trimmed): "Date started (UTC)", "Date completed (UTC)",
+     * "Description", "Reference", "Payer", "Amount", "Balance", "State". Extra/reordered
+     * columns are ignored.
+     */
+    public function parse(string $path, string $originalFilename, int $userId): BankImport
     {
-        return DB::transaction(function () use ($file, $userId) {
-            $csv = Reader::createFromPath($file->getRealPath(), 'r');
+        return DB::transaction(function () use ($path, $originalFilename, $userId) {
+            $csv = Reader::from($path, 'r');
             $csv->setHeaderOffset(0);
 
             $bankImport = BankImport::create([
-                'filename' => $file->getClientOriginalName(),
+                'filename' => $originalFilename,
                 'imported_at' => now(),
                 'status' => 'completed',
                 'total_rows' => 0,
@@ -24,15 +33,40 @@ class BankStatementParserService
 
             $rowCount = 0;
 
-            foreach ($csv as $record) {
-                // Adjust keys based on your bank CSV headers (e.g., Date, Description, Amount, Type, Reference)
+            foreach ($csv->getRecords() as $rawRecord) {
+                $record = [];
+                foreach ($rawRecord as $key => $value) {
+                    $record[trim($key)] = is_string($value) ? trim($value) : $value;
+                }
+
+                $state = $record['State'] ?? null;
+                if ($state !== null && $state !== '' && strtoupper($state) !== 'COMPLETED') {
+                    continue;
+                }
+
+                $dateValue = $record['Date completed (UTC)'] ?? null;
+                if (! $dateValue) {
+                    $dateValue = $record['Date started (UTC)'] ?? null;
+                }
+
+                $amountValue = $record['Amount'] ?? null;
+
+                if (! $dateValue || $amountValue === null || $amountValue === '') {
+                    continue;
+                }
+
+                $amount = (float) str_replace(',', '', $amountValue);
+                $balanceValue = $record['Balance'] ?? null;
+
                 Transaction::create([
                     'bank_import_id' => $bankImport->id,
-                    'transaction_date' => $record['Date'] ?? now(),
+                    'transaction_date' => Carbon::parse($dateValue),
                     'description' => $record['Description'] ?? '',
-                    'amount' => abs((float) ($record['Amount'] ?? 0)),
-                    'type' => strtolower($record['Type'] ?? 'debit'),
-                    'reference' => $record['Reference'] ?? null,
+                    'payer' => $record['Payer'] ?: null,
+                    'amount' => abs($amount),
+                    'balance_after' => ($balanceValue !== null && $balanceValue !== '') ? (float) str_replace(',', '', $balanceValue) : null,
+                    'type' => $amount >= 0 ? 'credit' : 'debit',
+                    'reference' => $record['Reference'] ?: null,
                 ]);
 
                 $rowCount++;

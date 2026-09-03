@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\BankImports\Schemas;
 
+use Filament\Forms\Components\FileUpload;
 use Filament\Schemas\Schema;
 
 class BankImportForm
@@ -10,7 +11,14 @@ class BankImportForm
     {
         return $schema
             ->components([
-                //
+                FileUpload::make('csv_file')
+                    ->label('Bank Statement CSV')
+                    ->disk('local')
+                    ->directory('bank-imports')
+                    ->preserveFilenames()
+                    ->acceptedFileTypes(['text/csv', 'application/vnd.ms-excel', 'text/plain'])
+                    ->required()
+                    ->columnSpanFull(),
             ]);
     }
 }
