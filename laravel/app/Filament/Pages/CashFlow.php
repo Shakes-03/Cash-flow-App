@@ -2,8 +2,11 @@
 
 namespace App\Filament\Pages;
 
+use App\Services\CashFlowExcelExporter;
 use App\Services\CashFlowService;
+use Filament\Actions\Action;
 use Filament\Pages\Page;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CashFlow extends Page
 {
@@ -21,5 +24,23 @@ class CashFlow extends Page
     public function getCashFlow(): array
     {
         return app(CashFlowService::class)->build();
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('exportExcel')
+                ->label('Export Excel')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->action(function (): StreamedResponse {
+                    $xlsx = app(CashFlowExcelExporter::class)->toXlsx($this->getCashFlow());
+
+                    return response()->streamDownload(function () use ($xlsx): void {
+                        echo $xlsx;
+                    }, 'cash-flow-'.now()->format('Y-m-d').'.xlsx', [
+                        'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    ]);
+                }),
+        ];
     }
 }

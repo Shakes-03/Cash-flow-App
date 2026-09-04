@@ -21,7 +21,8 @@ class CustomerMatchingService
             strtolower($transaction->description ?? ''),
         ]);
 
-        $rules = CustomerMatchingRule::all();
+        // Longer, more specific keywords are checked first (consistent with CategorizationService).
+        $rules = CustomerMatchingRule::all()->sortByDesc(fn ($rule) => strlen($rule->keyword))->values();
 
         foreach ($rules as $rule) {
             $keyword = strtolower($rule->keyword);

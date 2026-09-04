@@ -6,6 +6,7 @@
         $totals = $cashFlow['totals'];
 
         $incomeRows = array_filter($rows, fn ($row) => $row['section'] === 'income');
+        $costOfSalesRows = array_filter($rows, fn ($row) => $row['section'] === 'cost_of_sales');
         $expenseRows = array_filter($rows, fn ($row) => $row['section'] === 'expense');
 
         $money = fn ($value) => $value == 0 ? '—' : '£'.number_format($value, 2);
@@ -35,7 +36,7 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td colspan="{{ count($weeks) + 1 }}" style="{{ $sectionStyle }}">Income</td>
+                            <td colspan="{{ count($weeks) + 1 }}" style="{{ $sectionStyle }}">Sales Revenue</td>
                         </tr>
                         @foreach ($incomeRows as $row)
                             <tr>
@@ -46,9 +47,40 @@
                             </tr>
                         @endforeach
                         <tr style="font-weight:600;">
-                            <td style="{{ $labelStyle }} border-top:2px solid var(--gray-300, #d1d5db);">Total Income</td>
+                            <td style="{{ $labelStyle }} border-top:2px solid var(--gray-300, #d1d5db);">Total Sales</td>
                             @foreach ($weeks as $i => $week)
                                 <td style="{{ $cellStyle }} border-top:2px solid var(--gray-300, #d1d5db);">{{ $money($totals['income'][$i]) }}</td>
+                            @endforeach
+                        </tr>
+
+                        <tr>
+                            <td colspan="{{ count($weeks) + 1 }}" style="{{ $sectionStyle }}">Cost of Sales</td>
+                        </tr>
+                        @foreach ($costOfSalesRows as $row)
+                            <tr>
+                                <td style="{{ $labelStyle }} {{ $borderStyle }}">{{ $row['label'] }}</td>
+                                @foreach ($weeks as $i => $week)
+                                    <td style="{{ $cellStyle }} {{ $borderStyle }}">{{ $money($row['values'][$i] ?? 0) }}</td>
+                                @endforeach
+                            </tr>
+                        @endforeach
+                        <tr style="font-weight:600;">
+                            <td style="{{ $labelStyle }} border-top:2px solid var(--gray-300, #d1d5db);">Total Cost of Sales</td>
+                            @foreach ($weeks as $i => $week)
+                                <td style="{{ $cellStyle }} border-top:2px solid var(--gray-300, #d1d5db);">{{ $money($totals['costOfSales'][$i]) }}</td>
+                            @endforeach
+                        </tr>
+
+                        <tr style="font-weight:600;">
+                            <td style="{{ $labelStyle }} border-top:2px solid var(--gray-400, #9ca3af);">Gross Profit</td>
+                            @foreach ($weeks as $i => $week)
+                                <td style="{{ $cellStyle }} border-top:2px solid var(--gray-400, #9ca3af);">{{ $money($totals['gross'][$i]) }}</td>
+                            @endforeach
+                        </tr>
+                        <tr>
+                            <td style="{{ $labelStyle }} color:var(--gray-500, #6b7280);">Gross Margin %</td>
+                            @foreach ($weeks as $i => $week)
+                                <td style="{{ $cellStyle }} color:var(--gray-500, #6b7280);">{{ $totals['income'][$i] > 0 ? number_format($totals['grossMargin'][$i] * 100, 1).'%' : '—' }}</td>
                             @endforeach
                         </tr>
 
@@ -71,7 +103,7 @@
                         </tr>
 
                         <tr style="font-weight:600;">
-                            <td style="{{ $labelStyle }} border-top:2px solid var(--gray-400, #9ca3af);">Net Movement</td>
+                            <td style="{{ $labelStyle }} border-top:2px solid var(--gray-400, #9ca3af);">Net Cashflow</td>
                             @foreach ($weeks as $i => $week)
                                 <td style="{{ $cellStyle }} border-top:2px solid var(--gray-400, #9ca3af); color: {{ $totals['net'][$i] < 0 ? 'var(--danger-600, #dc2626)' : 'var(--success-600, #16a34a)' }};">{{ $money($totals['net'][$i]) }}</td>
                             @endforeach

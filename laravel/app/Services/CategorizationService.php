@@ -9,18 +9,27 @@ class CategorizationService
 {
     public function categorize(Transaction $transaction): void
     {
-        $rules = CategorizationRule::all();
+        // Longer, more specific keywords are checked first, so a broad catch-all
+        // (e.g. "to ") never shadows a narrower rule regardless of creation order.
+        $rules = CategorizationRule::all()->sortByDesc(fn ($rule) => strlen($rule->keyword))->values();
+
+        $haystacks = array_filter([
+            strtolower($transaction->description ?? ''),
+            strtolower($transaction->reference ?? ''),
+        ]);
 
         foreach ($rules as $rule) {
-            $isMatch = $rule->match_type === 'exact'
-                ? strtolower($transaction->description) === strtolower($rule->keyword)
-                : str_contains(strtolower($transaction->description), strtolower($rule->keyword));
+            $keyword = strtolower($rule->keyword);
 
-            if ($isMatch) {
-                $transaction->update([
-                    'category_id' => $rule->category_id
-                ]);
-                break;
+            foreach ($haystacks as $haystack) {
+                $isMatch = $rule->match_type === 'exact'
+                    ? $haystack === $keyword
+                    : str_contains($haystack, $keyword);
+
+                if ($isMatch) {
+                    $transaction->update(['category_id' => $rule->category_id]);
+                    return;
+                }
             }
         }
     }

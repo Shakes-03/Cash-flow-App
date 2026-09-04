@@ -10,7 +10,12 @@ class Category extends Model
     protected $fillable = [
         'name',
         'type',
+        'is_cost_of_sales',
         'color',
+    ];
+
+    protected $casts = [
+        'is_cost_of_sales' => 'boolean',
     ];
 
     public function transactions(): HasMany
