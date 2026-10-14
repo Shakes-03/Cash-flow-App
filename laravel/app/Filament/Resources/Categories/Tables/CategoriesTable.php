@@ -28,6 +28,9 @@ class CategoriesTable
                 IconColumn::make('is_cost_of_sales')
                     ->label('Cost of Sales')
                     ->boolean(),
+                IconColumn::make('is_funding')
+                    ->label('Funding')
+                    ->boolean(),
                 ColorColumn::make('color'),
                 TextColumn::make('created_at')
                     ->dateTime()

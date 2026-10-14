@@ -11,6 +11,13 @@ class Customer extends Model
         'name',
         'customer_number',
         'email',
+        'opening_balance',
+        'opening_balance_date',
+    ];
+
+    protected $casts = [
+        'opening_balance' => 'decimal:2',
+        'opening_balance_date' => 'date',
     ];
 
     public function invoices(): HasMany

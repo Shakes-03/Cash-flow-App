@@ -28,6 +28,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->profile(isSimple: false) // each user changes their own name, email and password
             ->colors([
                 'primary' => Color::Amber,
             ])

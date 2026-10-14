@@ -12,7 +12,7 @@ class CustomerMatchingService
      */
     public function match(Transaction $transaction): void
     {
-        if ($transaction->type !== 'credit' || $transaction->customer_id !== null) {
+        if ($transaction->type !== 'credit' || $transaction->customer_id !== null || $transaction->category_locked) {
             return;
         }
 

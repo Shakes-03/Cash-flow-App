@@ -28,6 +28,9 @@ class CategoryForm
                     ->label('Cost of Sales')
                     ->helperText('Show this expense under Cost of Sales (above Gross Profit) instead of Expenses on the Cash Flow report.')
                     ->visible(fn ($get) => $get('type') === 'expense'),
+                Toggle::make('is_funding')
+                    ->label('Funding / loan')
+                    ->helperText('Loans and inter-company funding. Shown on the Funding Capital line of the Cash Flow (money in adds, money out subtracts) instead of in Sales or Expenses.'),
                 ColorPicker::make('color'),
             ]);
     }

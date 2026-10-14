@@ -1,0 +1,6 @@
+Customer Name,Customer Number,Invoice Number,Invoice Date,Amount,Description
+Test Alpha Recruitment,TST-001,TINV-1001,2026-11-02,"5,000.00",November week 1 payroll
+Test Beta Staffing,TST-002,TINV-2001,2026-11-03,12000.00,November payroll
+Test Gamma Care,TST-003,TINV-3001,2026-11-04,2400.00,November week 1 payroll
+Test Alpha Recruitment,TST-001,TINV-1002,2026-11-16,3000.00,November week 3 payroll
+Test Gamma Care,TST-003,TINV-3002,2026-11-18,2400.00,November week 3 payroll

@@ -18,7 +18,8 @@ class EditInvoiceImport extends EditRecord
             ->components([
                 TextInput::make('filename')->disabled(),
                 TextInput::make('status')->disabled(),
-                TextInput::make('total_rows')->disabled(),
+                TextInput::make('total_rows')->label('Imported')->disabled(),
+                TextInput::make('duplicates_skipped')->label('Already imported (skipped)')->disabled(),
             ]);
     }
 

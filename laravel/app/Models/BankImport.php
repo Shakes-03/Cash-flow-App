@@ -13,6 +13,7 @@ class BankImport extends Model
         'imported_at',
         'status',
         'total_rows',
+        'duplicates_skipped',
         'user_id',
     ];
 

@@ -27,8 +27,12 @@ class BankImportsTable
                         default => 'gray',
                     }),
                 TextColumn::make('total_rows')
+                    ->label('Imported')
                     ->numeric()
                     ->sortable(),
+                TextColumn::make('duplicates_skipped')
+                    ->label('Already imported (skipped)')
+                    ->numeric(),
                 TextColumn::make('user.name')
                     ->sortable(),
                 TextColumn::make('created_at')
